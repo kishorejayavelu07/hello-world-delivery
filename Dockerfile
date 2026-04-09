@@ -1,17 +1,17 @@
 #-----------Build Stage----------------
-FROM node:25 AS builder
+FROM node:20 AS builder
 
 WORKDIR /app
 
 
 
-COPY package.json ./
+COPY app/package.json ./
 RUN npm install
 
-COPY . .
+COPY app/ ./
 
 #-----------Runtime Stage----------------
-FROM gcr.io/distroless/nodejs20-debian12
+FROM gcr.io/distroless/nodejs20-debian13
 
 
 WORKDIR /app
@@ -19,4 +19,5 @@ COPY --from=builder /app/app.js ./app.js
 COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3001
-CMD ["node", "app.js"]
+ENTRYPOINT []
+CMD ["/nodejs/bin/node", "app.js"]
