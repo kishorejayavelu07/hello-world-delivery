@@ -1,0 +1,21 @@
+node_modules/
+npm-debug.log
+.env
+.DS_Store
+
+# Build artifacts
+dist/
+build/
+
+# Logs
+logs
+*.log
+
+# OS files
+Thumbs.db
+
+# Azure DevOps
+.azure-pipelines/
+
+# Docker
+*.tar
