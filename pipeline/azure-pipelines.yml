@@ -27,6 +27,11 @@ stages:
         npm install
       workingDirectory: app
 
+    - script: |
+        npm run lint
+      workingDirectory: app
+      displayName: "Run ESLint"
+
     - task: PublishBuildArtifacts@1
       inputs:
         pathToPublish: 'app'

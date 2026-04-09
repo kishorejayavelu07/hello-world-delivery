@@ -19,4 +19,4 @@ COPY --from=builder /app/app.js ./app.js
 COPY --from=builder /app/node_modules ./node_modules
 
 EXPOSE 3001
-CMD ["app.js"]
+CMD ["node", "app.js"]
