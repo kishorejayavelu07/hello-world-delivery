@@ -21,37 +21,69 @@ stages:
     steps:
     - task: NodeTool@0
       inputs:
-        versionSpec: '18.x'
+        versionSpec: '20.x'
 
     - script: |
         npm install
       workingDirectory: app
+
+    - script: |
+        npm run lint
+      workingDirectory: app
+      displayName: "Run ESLint"
 
     - task: PublishBuildArtifacts@1
       inputs:
         pathToPublish: 'app'
         artifactName: 'app'
 
-# - stage: Deploy_Dev
-#   dependsOn: Build
-#   jobs:
-#   - deployment: DeployDev
-#     environment: dev
-#     strategy:
-#       runOnce:
-#         deploy:
-#           steps:
-#           - download: current
-#           - script: echo "Deploying to Dev environment"
+    - script: |
+        docker build -t hello-world:$(Build.BuildId) .
+        docker tag hello-world:$(Build.BuildId) hello-world:latest
+      displayName: "Build Docker Image"
 
-# - stage: Deploy_Staging
-#   dependsOn: Deploy_Dev
-#   condition: succeeded()
-#   jobs:
-#   - deployment: DeployStage
-#     environment: staging
-#     strategy:
-#       runOnce:
-#         deploy:
-#           steps:
-#           - script: echo "Deploying to Staging"
+- stage: Deploy_Dev
+  dependsOn: Build
+  condition: succeeded()
+  jobs:
+  - deployment: DeployDev
+    displayName: "Deploy to Dev"
+    environment: 
+      name: development
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - script: |
+              echo "Deploying hello-world:$(Build.BuildId) to Dev environment"
+              docker run -d -p 3001:3001 --name hello-world-dev --restart unless-stopped hello-world:$(Build.BuildId)
+            displayName: "Run container in Dev"
+          - script: |
+              sleep 5
+              curl -f http://localhost:3001/health || exit 1
+            displayName: "Health check - Dev"
+            continueOnError: false
+
+- stage: Deploy_Staging
+  dependsOn: Deploy_Dev
+  condition: succeeded()
+  jobs:
+  - deployment: DeployStaging
+    displayName: "Deploy to Staging"
+    environment:
+      name: staging
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - checkout: self
+          - script: |
+              echo "Deploying hello-world:$(Build.BuildId) to Staging environment"
+              docker run -d -p 3002:3001 --name hello-world-staging --restart unless-stopped hello-world:$(Build.BuildId)
+            displayName: "Run container in Staging"
+          - script: |
+              sleep 5
+              curl -f http://localhost:3002/health || exit 1
+            displayName: "Health check - Staging"
+            continueOnError: false

@@ -1,0 +1,24 @@
+title = "Gitleaks configuration for CI security scanning"
+
+[allowlist]
+description = "Allow common non-secret test strings"
+regexes = [
+  '''example''',
+  '''test'''
+]
+
+[[rules]]
+description = "Generic API Key"
+regex = '''(?i)api[_-]?key.{0,20}['\"][0-9a-zA-Z]{16,45}['\"]'''
+tags = ["key", "API"]
+
+[[rules]]
+description = "Private Key"
+regex = '''-----BEGIN(.*?)PRIVATE KEY-----'''
+tags = ["key", "private"]
+
+[[rules]]
+id = "generic-password"
+description = "Detect any PASSWORD assignment"
+regex = '''(?i)password\s*=\s*["'][^"']+["']'''
+tags = ["password", "custom"]
