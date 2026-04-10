@@ -1,6 +1,6 @@
 # Hello World Delivery
 
-A minimal but disciplined Node.js web application demonstrating release engineering, deployment automation, security controls, and practical delivery structure.
+A minimal Node.js web application demonstrating release engineering, deployment automation, security controls, and practical delivery structure.
 
 ## Overview
 
@@ -67,6 +67,8 @@ npm start
 ```
 The app will start on `http://localhost:3001`
 
+OUTPUT: Hello World from container 👋 Hostname: f80104148d2a
+
 **Endpoints:**
 - `GET /` - Returns greeting with hostname
 - `GET /health` - Returns "OK" for health checks
@@ -86,7 +88,7 @@ docker run -p 3001:3001 hello-world:latest
 #### Test the Application
 ```bash
 curl http://localhost:3001
-curl http://localhost:3001/health
+curl http://localhost:3001/health -> It would return "OK"
 ```
 
 ---
@@ -172,28 +174,25 @@ Manual approval for Production
 **Development**
 - Target: `https://dev-api.example.com`
 - Deployment: Automatic after build passes
-- Retention: Latest build
 - Purpose: Integration testing, smoke tests
 - Container Tag: `dev-latest`, `dev-${BUILD_ID}`
 
 **Staging**
 - Target: `https://staging-api.example.com`
 - Deployment: Automatic after dev deployment succeeds
-- Retention: Last 5 builds
 - Purpose: Pre-production testing, performance validation
 - Container Tag: `staging-latest`, `staging-${BUILD_ID}`
 
 **Production** *(ready for implementation)*
 - Target: `https://api.example.com`
 - Deployment: Manual approval from release manager
-- Retention: Last 10 builds (immutable)
 - Purpose: Customer-facing, SLA-bound
 - Container Tag: Semantic versioning (`v1.0.0`, `v1.0.1`, etc.)
 
 ### Deployment Triggers
 
 **Automatic Promotion:**
-- Dev: Deploys on every successful build on `main` branch
+- Dev: Deploys on every successful build on `develop` branch
 - Staging: Deploys when dev deployment completes successfully
 
 **Manual Approval:**
@@ -234,11 +233,6 @@ id = "generic-password"
 description = "Detect any PASSWORD assignment"
 regex = '''(?i)password\s*=\s*["'][^"']+["']'''
 tags = ["password", "custom"]
-
-[[rules]]
-description = "AWS Access Key"
-regex = '''AKIA[0-9A-Z]{16}'''
-tags = ["key", "AWS"]
 
 [[rules]]
 description = "Generic API Key"
@@ -424,19 +418,6 @@ The application provides a health check endpoint for monitoring:
 curl http://localhost:3001/health
 # Response: 200 OK
 ```
-
-### Container Health Checks
-
-Add to Docker Compose or orchestration platform:
-```yaml
-healthcheck:
-  test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
-  interval: 30s
-  timeout: 10s
-  retries: 3
-  start_period: 5s
-```
-
 ### Pipeline Status Monitoring
 
 - View pipeline status in Azure DevOps
@@ -445,21 +426,12 @@ healthcheck:
 
 ---
 
-## Assumptions, Shortcuts & Trade-Offs
-
 ### Assumptions
 1. **Docker is available** - All deployments assume Docker/container runtime
 2. **Azure DevOps platform** - Pipeline uses Azure-specific tasks and features
 3. **Minimal app scope** - Application intentionally simple for focus on delivery workflow
 4. **Single container host** - Deployment assumes single-host container runtime (not Kubernetes)
 5. **Publicly accessible repositories** - Assumes public source and artifact repositories
-
-### Shortcuts
-1. **No persistent storage** - Application is stateless; no database integration
-2. **Configuration via environment variables** - No external config management system
-3. **Distroless images only** - No debugging/SSH in production images
-4. **Single port** - Only exposes port 3001; no reverse proxy
-5. **No log aggregation** - Logs to stdout only (suitable for container orchestration)
 
 ### Trade-Offs
 | Aspect | Choice | Reason |
@@ -471,41 +443,24 @@ healthcheck:
 | Testing | Linting only | No unit/integration tests (scope limitation) |
 | Documentation | Single README | Best practice for small projects; would split for larger projects |
 
-### Future Enhancements
-1. **Add unit/integration tests** - Jest or Mocha test framework
-2. **Implement Kubernetes deployment** - Helm charts and deployment manifests
-3. **Add runtime secret management** - Azure Key Vault or HashiCorp Vault integration
-4. **Metric collection** - Prometheus metrics endpoint
-5. **Distributed tracing** - OpenTelemetry instrumentation
-6. **Canary deployments** - Progressive rollout for production
-7. **GitOps workflow** - Flux or ArgoCD for declarative deployment
-8. **Infrastructure as Code** - Bicep or Terraform for environment provisioning
 
----
-
-## Troubleshooting
-
-### Pipeline Failures
-
+## Troubleshooting Pipeline Failures
 **Gitleaks fails:**
 ```bash
 # Review what was flagged
 docker run --rm -v $(pwd):/repo zricethezav/gitleaks detect --verbose
 # Remove the secret and retry
 ```
-
 **ESLint fails:**
 ```bash
 cd app
 npm run lint
 npm run lint -- --fix
 ```
-
 **Docker build fails:**
 - Verify Node 20 is in use
 - Check network connectivity for npm package downloads
 - Ensure `app/package.json` exists
-
 **Container won't start:**
 ```bash
 docker run -it hello-world:latest /bin/bash  # (Not applicable with Distroless)
@@ -528,25 +483,9 @@ kill -9 <PID>  # Kill the process
 ---
 
 ## Contributing
-
 1. Create feature branch from `develop`
 2. Make changes following project conventions
 3. Commit with clear messages
 4. Push and create pull request
 5. Address review feedback
 6. Merge to `develop` after approval
-
----
-
-## License
-
-MIT License - See LICENSE file for details
-
----
-
-## Questions?
-
-For questions or issues, please:
-1. Check this README for troubleshooting
-2. Review pipeline logs in Azure DevOps
-3. Open an issue in the repository
