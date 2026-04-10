@@ -7,6 +7,9 @@ A minimal Node.js web application demonstrating release engineering, deployment 
 This project showcases a complete delivery workflow from source to deployment, including:
 - A minimal Express.js "Hello World" web application
 - Multi-stage Azure DevOps CI/CD pipeline with automated security scanning
+
+NOTE: AS AZURE STOPPED PUBLIC REPO ACCESS, CREATE ALL THE SETTING IN GITHUB/GITHUB ACTIONS
+- Multi-stage GITHUB CI/CD pipeline with automated security scanning
 - Containerized deployment using Docker with multi-stage builds
 - Environment-separated deployment strategy (Development → Staging → Production)
 - Automated security checks (Gitleaks secret detection, ESLint code quality)
@@ -169,26 +172,6 @@ Deploy to Staging (automatic after dev passes)
 Manual approval for Production
 ```
 
-### Environment Configuration
-
-**Development**
-- Target: `https://dev-api.example.com`
-- Deployment: Automatic after build passes
-- Purpose: Integration testing, smoke tests
-- Container Tag: `dev-latest`, `dev-${BUILD_ID}`
-
-**Staging**
-- Target: `https://staging-api.example.com`
-- Deployment: Automatic after dev deployment succeeds
-- Purpose: Pre-production testing, performance validation
-- Container Tag: `staging-latest`, `staging-${BUILD_ID}`
-
-**Production** *(ready for implementation)*
-- Target: `https://api.example.com`
-- Deployment: Manual approval from release manager
-- Purpose: Customer-facing, SLA-bound
-- Container Tag: Semantic versioning (`v1.0.0`, `v1.0.1`, etc.)
-
 ### Deployment Triggers
 
 **Automatic Promotion:**
@@ -321,17 +304,6 @@ Branch protection rules should be configured in Azure DevOps to enforce code qua
 - Required: Yes
 - Purpose: Ensures feedback is addressed
 
-### How to Configure in Azure DevOps
-
-1. Navigate to **Project Settings** → **Repositories** → **Branches**
-2. Select the branch (e.g., `main`)
-3. Click **Branch policies** (gear icon)
-4. Configure each policy as listed above:
-   - **Status checks:** Add build validation
-   - **Pull request reviews:** Set minimum reviewer count
-   - **Work items:** Require linked work items
-5. Click **Save**
-
 ### Enforcement Behavior
 
 | Action | main | develop |
@@ -406,7 +378,6 @@ Branch protection rules should be configured in Azure DevOps to enforce code qua
    git tag -a v1.0.0 -m "Release version 1.0.0"
    git push origin v1.0.0
    ```
-
 ---
 
 ## Monitoring & Health Checks
